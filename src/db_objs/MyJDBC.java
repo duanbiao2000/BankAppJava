@@ -13,7 +13,7 @@ public class MyJDBC {
     // database configurations
     private static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/bankapp";
     private static final String DB_USERNAME = "root";
-    private static final String DB_PASSWORD = "password";
+    private static final String DB_PASSWORD = "Qwer1234";
 
     // if valid return an object with the user's information
     public static User validateLogin(String username, String password){
@@ -222,22 +222,33 @@ public class MyJDBC {
         return false;
     }
 
-    // get all transactions (used for past transaction)
+    /**
+     * 获取所有过去交易记录
+     * 该方法主要用于获取用户的历史交易记录
+     *
+     * @param user 用户对象，包含用户ID等信息
+     * @return 返回一个Transaction对象的ArrayList，包含该用户的全部历史交易记录
+     */
     public static ArrayList<Transaction> getPastTransaction(User user){
+        // 创建一个ArrayList来存储历史交易记录
         ArrayList<Transaction> pastTransactions = new ArrayList<>();
         try{
+            // 建立数据库连接
             Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
 
+            // 准备SQL查询语句，根据user_id查询transactions表中的记录
             PreparedStatement selectAllTransaction = connection.prepareStatement(
                 "SELECT * FROM transactions WHERE user_id = ?"
             );
+            // 设置查询参数，即用户的ID
             selectAllTransaction.setInt(1, user.getId());
 
+            // 执行查询并获取结果集
             ResultSet resultSet = selectAllTransaction.executeQuery();
 
-            // iterate throught the results (if any)
+            // 遍历结果集
             while(resultSet.next()){
-                // create transaction obj
+                // 根据结果集创建交易对象
                 Transaction transaction = new Transaction(
                         user.getId(),
                         resultSet.getString("transaction_type"),
@@ -245,15 +256,18 @@ public class MyJDBC {
                         resultSet.getDate("transaction_date")
                 );
 
-                // store into array list
+                // 将交易对象添加到ArrayList中
                 pastTransactions.add(transaction);
             }
         }catch(SQLException e){
+            // 处理SQL异常
             e.printStackTrace();
         }
 
+        // 返回历史交易记录列表
         return pastTransactions;
     }
+
 }
 
 
